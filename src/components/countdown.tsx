@@ -1,0 +1,115 @@
+import { useState, useEffect, useMemo, memo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+
+interface TimeLeft {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+}
+
+const TimeBox = memo<{ value: number; label: string }>(({ value, label }) => {
+  const digits = value.toString().padStart(2, "0").split("");
+
+  return (
+    <div className="bg-gray-800 rounded-lg p-6 shadow-xl border">
+      <div className="text-6xl font-black text-amber-300 flex justify-center overflow-hidden">
+        {digits.map((digit, index) => (
+          <div key={index} className="relative w-12 h-16 overflow-hidden">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`${label}-${index}-${digit}`}
+                initial={{ y: -50, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 50, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="absolute inset-0 flex items-center justify-center"
+              >
+                {digit}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        ))}
+      </div>
+      <div className="text-xs sm:text-sm text-muted-foreground uppercase mt-2 text-center">
+        {label}
+      </div>
+    </div>
+  );
+});
+
+const getNextWeekday16 = (): Date => {
+  const now = new Date();
+  const day = now.getDay();
+  const hour = now.getHours();
+  const target = new Date(now);
+
+  // If weekend, go to Monday 16:00
+  if (day === 0 || day === 6) {
+    const daysToMonday = day === 0 ? 1 : 2;
+    target.setDate(now.getDate() + daysToMonday);
+    target.setHours(16, 0, 0, 0);
+  } else {
+    // If weekday before 16:00, target today at 16:00
+    if (hour < 16) {
+      target.setHours(16, 0, 0, 0);
+    } else {
+      // After 16:00, target next weekday at 16:00
+      const daysToAdd = day === 5 ? 3 : 1; // Friday -> Monday, else next day
+      target.setDate(now.getDate() + daysToAdd);
+      target.setHours(16, 0, 0, 0);
+    }
+  }
+  return target;
+};
+
+const Countdown: React.FC = () => {
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+  });
+
+  const targetDate = useMemo(getNextWeekday16, []);
+
+  useEffect(() => {
+    const calculateTimeLeft = () => {
+      const diff = targetDate.getTime() - Date.now();
+
+      if (diff > 0) {
+        setTimeLeft({
+          days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+          minutes: Math.floor((diff / (1000 * 60)) % 60),
+          seconds: Math.floor((diff / 1000) % 60),
+        });
+      } else {
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+      }
+    };
+
+    calculateTimeLeft();
+    const timer = setInterval(calculateTimeLeft, 1000);
+    return () => clearInterval(timer);
+  }, [targetDate]);
+
+  useEffect(() => {
+    const { days, hours, minutes, seconds } = timeLeft;
+    const totalHours = hours + days * 24;
+    document.title = `${String(totalHours).padStart(2, "0")}:${String(
+      minutes
+    ).padStart(2, "0")}:${String(seconds).padStart(2, "0")} - Mibo`;
+  }, [timeLeft]);
+
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto px-4">
+      <TimeBox value={timeLeft.days} label="days" />
+      <TimeBox value={timeLeft.hours} label="hours" />
+      <TimeBox value={timeLeft.minutes} label="minutes" />
+      <TimeBox value={timeLeft.seconds} label="seconds" />
+    </div>
+  );
+};
+
+export default Countdown;
