@@ -70,12 +70,22 @@ const Countdown: React.FC = () => {
     minutes: 0,
     seconds: 0,
   });
+  const [isMiboTime, setIsMiboTime] = useState(false);
 
   const targetDate = useMemo(getNextWeekday16, []);
 
   useEffect(() => {
     const calculateTimeLeft = () => {
-      const diff = targetDate.getTime() - Date.now();
+      const now = new Date();
+      const day = now.getDay();
+      const hour = now.getHours();
+
+      // Check if it's mibo time (weekday between 16:00 and 20:00)
+      const isWeekday = day >= 1 && day <= 5;
+      const isMiboHour = hour >= 16 && hour < 20;
+      setIsMiboTime(isWeekday && isMiboHour);
+
+      const diff = targetDate.getTime() - now.getTime();
 
       if (diff > 0) {
         setTimeLeft({
@@ -95,12 +105,28 @@ const Countdown: React.FC = () => {
   }, [targetDate]);
 
   useEffect(() => {
-    const { days, hours, minutes, seconds } = timeLeft;
-    const totalHours = hours + days * 24;
-    document.title = `${String(totalHours).padStart(2, "0")}:${String(
-      minutes
-    ).padStart(2, "0")}:${String(seconds).padStart(2, "0")} - Mibo`;
-  }, [timeLeft]);
+    if (isMiboTime) {
+      document.title = "Het is mibo tijd!";
+    } else {
+      const { days, hours, minutes, seconds } = timeLeft;
+      const totalHours = hours + days * 24;
+      document.title = `${String(totalHours).padStart(2, "0")}:${String(
+        minutes
+      ).padStart(2, "0")}:${String(seconds).padStart(2, "0")} - Mibo`;
+    }
+  }, [timeLeft, isMiboTime]);
+
+  if (isMiboTime) {
+    return (
+      <motion.div
+        animate={{ scale: [1, 1.05, 1] }}
+        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        className="text-4xl sm:text-6xl font-black text-amber-300 text-center animate-pulse"
+      >
+        Het is mibo tijd!
+      </motion.div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto px-4">
