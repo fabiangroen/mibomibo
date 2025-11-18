@@ -1,10 +1,12 @@
 import bier from "/bier.svg";
 import Countdown from "./components/countdown";
 import BeerIcon from "./components/beer-icon";
+import CursorOverlay from "./components/cursorOverlay";
 
 function App() {
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col justify-center items-center px-4 relative overflow-hidden">
+      <CursorOverlay />
       <div className="flex items-center gap-3 mb-2 z-10">
         <BeerIcon
           src={bier}
