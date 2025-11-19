@@ -9,6 +9,7 @@ export const useCursors = () => {
   const myColor = useRef(
     "#" + Math.floor(Math.random() * 16777215).toString(16)
   );
+  const lastMouseMove = useRef(Date.now());
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
@@ -18,13 +19,14 @@ export const useCursors = () => {
 
       // 1. Broadcasting
       const handleMouseMove = throttle((event) => {
+        lastMouseMove.current = Date.now();
         set(myRef, {
           x: Math.round((event.clientX / window.innerWidth) * 1000) / 1000,
           y: Math.round((event.clientY / window.innerHeight) * 1000) / 1000,
           color: myColor.current,
           lastUpdate: Date.now(),
         });
-      }, 50);
+      }, 100);
 
       // 2. Cleanup on Disconnect (Offline capability)
       onDisconnect(myRef).remove();
@@ -39,8 +41,16 @@ export const useCursors = () => {
         setOthers(others);
       });
 
+      const intervalId = setInterval(() => {
+        const now = Date.now();
+        if (now - lastMouseMove.current > 10000) {
+          remove(myRef);
+        }
+      }, 2000);
+
       return () => {
         window.removeEventListener("mousemove", handleMouseMove);
+        clearInterval(intervalId);
         remove(myRef);
         unsubscribeCursors();
       };

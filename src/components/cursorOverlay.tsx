@@ -9,7 +9,7 @@ const CursorOverlay: React.FC = () => {
       {Object.entries(cursors).map(([userId, cursor]) => (
         <div
           key={userId}
-          className="absolute transition-all duration-75 ease-linear"
+          className="absolute transition-all duration-150 ease-linear"
           style={{
             left: `${cursor.x * 100}%`,
             top: `${cursor.y * 100}%`,
