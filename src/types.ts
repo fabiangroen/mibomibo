@@ -3,4 +3,5 @@ export interface Cursor {
   y: number;
   color: string;
   lastUpdate?: number;
+  name?: string;
 }

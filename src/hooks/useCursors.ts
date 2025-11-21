@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { ref, onValue, set, onDisconnect, remove } from "firebase/database";
+import { ref, onValue, update, onDisconnect, remove } from "firebase/database";
 import { onAuthStateChanged } from "firebase/auth";
 import throttle from "lodash/throttle";
 import { db, auth } from "../firebase";
@@ -20,7 +20,7 @@ export const useCursors = () => {
       // 1. Broadcasting
       const handleMouseMove = throttle((event) => {
         lastMouseMove.current = Date.now();
-        set(myRef, {
+        update(myRef, {
           x: Math.round((event.clientX / window.innerWidth) * 1000) / 1000,
           y: Math.round((event.clientY / window.innerHeight) * 1000) / 1000,
           color: myColor.current,

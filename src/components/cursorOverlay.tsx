@@ -31,14 +31,14 @@ const CursorOverlay: React.FC = () => {
             />
           </svg>
 
-          {/* User ID Label, not sensical right now since anonymous users
-          <div
-            className="mt-1 px-2 py-1 rounded text-xs text-white font-medium whitespace-nowrap"
-            style={{ backgroundColor: cursor.color }}
-          >
-            User {userId.slice(0, 4)}
-          </div>
-            */}
+          {cursor.name && (
+            <div
+              className="mt-1 px-2 py-1 rounded text-xs text-white font-medium whitespace-nowrap"
+              style={{ backgroundColor: cursor.color }}
+            >
+              {cursor.name}
+            </div>
+          )}
         </div>
       ))}
     </div>
