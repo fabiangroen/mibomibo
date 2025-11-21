@@ -39,29 +39,20 @@ const CursorOverlay: React.FC = () => {
     self: Cursor | null;
   };
   const localCursorRef = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     const handleMove = (e: MouseEvent) => {
       if (localCursorRef.current) {
         localCursorRef.current.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
       }
-      if (!isVisible) setIsVisible(true);
     };
 
-    const handleLeave = () => setIsVisible(false);
-    const handleEnter = () => setIsVisible(true);
-
     window.addEventListener("mousemove", handleMove, { passive: true });
-    document.body.addEventListener("mouseleave", handleLeave);
-    document.body.addEventListener("mouseenter", handleEnter);
 
     return () => {
       window.removeEventListener("mousemove", handleMove);
-      document.body.removeEventListener("mouseleave", handleLeave);
-      document.body.removeEventListener("mouseenter", handleEnter);
     };
-  }, [isVisible]);
+  }, []);
 
   return (
     <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
@@ -85,7 +76,6 @@ const CursorOverlay: React.FC = () => {
         ref={localCursorRef}
         className="fixed top-0 left-0 will-change-transform z-50"
         style={{
-          opacity: isVisible ? 1 : 0,
           transition: "opacity 0.2s",
         }}
       >
