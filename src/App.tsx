@@ -4,9 +4,12 @@ import type { TimeLeft } from "./components/countdown";
 import BeerIcon from "./components/beer-icon";
 import CursorOverlay from "./components/cursorOverlay";
 import CursorChange from "./components/cursorChange";
+import { VideoOverlay } from "./components/VideoOverlay";
+import { useSecretCode } from "./hooks/useSecretCode";
 import { useState } from "react";
 
 function App() {
+  useSecretCode();
   const [timeLeft, setTimeLeft] = useState<TimeLeft>({
     hours: 0,
     minutes: 0,
@@ -16,6 +19,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col justify-center items-center px-4 relative overflow-hidden cursor-none">
+      <VideoOverlay />
       <CursorOverlay />
       <CursorChange />
       {(!isMiboTime || (timeLeft.hours == 0 && timeLeft.minutes == 0)) && (
