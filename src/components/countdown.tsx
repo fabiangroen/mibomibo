@@ -1,8 +1,7 @@
 import { useState, useEffect, useMemo, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-interface TimeLeft {
-  days: number;
+export interface TimeLeft {
   hours: number;
   minutes: number;
   seconds: number;
@@ -63,13 +62,15 @@ const getNextWeekday16 = (): Date => {
   return target;
 };
 
-const Countdown: React.FC = () => {
-  const [timeLeft, setTimeLeft] = useState<TimeLeft>({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0,
-  });
+const Countdown: React.FC<{
+  timeLeft: TimeLeft;
+  setTimeLeft: React.Dispatch<React.SetStateAction<TimeLeft>>;
+}> = ({ timeLeft, setTimeLeft }) => {
+  // const [timeLeft, setTimeLeft] = useState<TimeLeft>({
+  //   hours: 0,
+  //   minutes: 0,
+  //   seconds: 0,
+  // });
   const [isMiboTime, setIsMiboTime] = useState(false);
 
   const targetDate = useMemo(getNextWeekday16, []);
@@ -89,13 +90,12 @@ const Countdown: React.FC = () => {
 
       if (diff > 0) {
         setTimeLeft({
-          days: Math.floor(diff / (1000 * 60 * 60 * 24)),
-          hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+          hours: Math.floor(diff / (1000 * 60 * 60)),
           minutes: Math.floor((diff / (1000 * 60)) % 60),
           seconds: Math.floor((diff / 1000) % 60),
         });
       } else {
-        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+        setTimeLeft({ hours: 0, minutes: 0, seconds: 0 });
       }
     };
 
@@ -108,9 +108,8 @@ const Countdown: React.FC = () => {
     if (isMiboTime) {
       document.title = "Het is mibo tijd!";
     } else {
-      const { days, hours, minutes, seconds } = timeLeft;
-      const totalHours = hours + days * 24;
-      document.title = `${String(totalHours).padStart(2, "0")}:${String(
+      const { hours, minutes, seconds } = timeLeft;
+      document.title = `${String(hours).padStart(2, "0")}:${String(
         minutes
       ).padStart(2, "0")}:${String(seconds).padStart(2, "0")} - Mibo`;
     }
@@ -128,14 +127,26 @@ const Countdown: React.FC = () => {
     );
   }
 
-  return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto px-4">
-      <TimeBox value={timeLeft.days} label="days" />
-      <TimeBox value={timeLeft.hours} label="hours" />
-      <TimeBox value={timeLeft.minutes} label="minutes" />
-      <TimeBox value={timeLeft.seconds} label="seconds" />
-    </div>
-  );
+  if (!(timeLeft.minutes == 0 && timeLeft.hours == 0)) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 max-w-4xl mx-auto px-4">
+        <TimeBox value={timeLeft.hours} label="hours" />
+        <TimeBox value={timeLeft.minutes} label="minutes" />
+        <TimeBox value={timeLeft.seconds} label="seconds" />
+      </div>
+    );
+  } else {
+    return (
+      <motion.div
+        key={timeLeft.seconds}
+        animate={{ scale: [1, 1, 0] }}
+        transition={{ duration: 1, ease: "easeIn" }}
+        className="text-[16rem] sm:text-[24rem] font-black text-amber-300 text-center animate-pulse"
+      >
+        {timeLeft.seconds}
+      </motion.div>
+    );
+  }
 };
 
 export default Countdown;
