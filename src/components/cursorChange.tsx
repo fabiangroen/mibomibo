@@ -15,7 +15,7 @@ import { HexColorPicker } from "react-colorful";
 
 import { useState, useEffect } from "react";
 import { db, auth } from "../firebase";
-import { ref, update, get } from "firebase/database";
+import { ref, update, onValue } from "firebase/database";
 import { onAuthStateChanged } from "firebase/auth";
 
 import { MousePointer2 } from "lucide-react";
@@ -25,20 +25,31 @@ export default function CursorChange() {
   const [color, setColor] = useState("#000000");
   const [user, setUser] = useState<string | null>(null);
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       if (!user) return;
       setUser(user.uid);
-      const myRef = ref(db, `cursors/${user.uid}/`);
-      get(myRef).then((snapshot) => {
-        if (snapshot.exists()) {
-          setName(snapshot.val().name);
-          setColor(snapshot.val().color);
-        }
+
+      const colorRef = ref(db, `cursors/${user.uid}/color`);
+      const nameRef = ref(db, `cursors/${user.uid}/name`);
+
+      // 2. Listen ONLY to color changes (ignores x/y updates)
+      const unsubColor = onValue(colorRef, (snapshot) => {
+        if (snapshot.exists()) setColor(snapshot.val());
       });
+
+      // 3. Listen ONLY to name changes (ignores x/y updates)
+      const unsubName = onValue(nameRef, (snapshot) => {
+        if (snapshot.exists()) setName(snapshot.val());
+      });
+
+      return () => {
+        unsubColor();
+        unsubName();
+      };
     });
 
     return () => {
-      unsubscribe();
+      unsubscribeAuth();
     };
   }, []);
 
