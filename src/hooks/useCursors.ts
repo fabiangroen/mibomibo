@@ -44,7 +44,12 @@ export const useCursors = () => {
       const intervalId = setInterval(() => {
         const now = Date.now();
         if (now - lastMouseMove.current > 10000) {
-          remove(myRef);
+          update(myRef, {
+            x: null,
+            y: null,
+            color: null,
+            lastUpdate: null,
+          });
         }
       }, 2000);
 
