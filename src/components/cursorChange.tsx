@@ -87,11 +87,7 @@ export default function CursorChange() {
           </div>
           <DialogFooter>
             <DialogClose asChild>
-              <Button
-                onClick={() => updateCursor(name, color)}
-                disabled={!user}
-                variant="beer"
-              >
+              <Button onClick={() => updateCursor(name, color)} variant="beer">
                 Confirm
               </Button>
             </DialogClose>
