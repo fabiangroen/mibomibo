@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { useCursors } from "../hooks/useCursors";
 import type { Cursor } from "../types";
 
