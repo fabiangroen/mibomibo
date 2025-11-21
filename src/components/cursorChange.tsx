@@ -22,7 +22,7 @@ import { MousePointer2 } from "lucide-react";
 
 export default function CursorChange() {
   const [name, setName] = useState("");
-  const [color, setColor] = useState("#000000");
+  const [color, setColor] = useState("#FFFFFF");
   const [user, setUser] = useState<string | null>(null);
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
@@ -32,12 +32,10 @@ export default function CursorChange() {
       const colorRef = ref(db, `cursors/${user.uid}/color`);
       const nameRef = ref(db, `cursors/${user.uid}/name`);
 
-      // 2. Listen ONLY to color changes (ignores x/y updates)
       const unsubColor = onValue(colorRef, (snapshot) => {
         if (snapshot.exists()) setColor(snapshot.val());
       });
 
-      // 3. Listen ONLY to name changes (ignores x/y updates)
       const unsubName = onValue(nameRef, (snapshot) => {
         if (snapshot.exists()) setName(snapshot.val());
       });
@@ -63,7 +61,7 @@ export default function CursorChange() {
     <div className="absolute top-4 right-4">
       <Dialog>
         <DialogTrigger asChild>
-          <Button variant="outline" size="icon">
+          <Button variant="outline" size="icon" className="cursor-none">
             <MousePointer2 />
           </Button>
         </DialogTrigger>

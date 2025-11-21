@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import { motion } from "framer-motion";
 
 interface BeerIconProps {
@@ -7,48 +7,42 @@ interface BeerIconProps {
   className?: string;
 }
 
+const BeerRain = memo(({ src }: { src: string }) => (
+  <div className="fixed inset-0 pointer-events-none z-50">
+    {Array.from({ length: 100 }).map((_, i) => (
+      <motion.img
+        key={i}
+        src={src}
+        className="absolute w-8 h-8"
+        initial={{ y: -300, x: `${Math.random() * 100}vw`, rotate: 0 }}
+        animate={{ y: "110vh", rotate: Math.random() > 0.5 ? 360 : -360 }}
+        transition={{
+          duration: 3 + Math.random() * 5,
+          ease: "linear",
+          delay: Math.random() * 0.5,
+        }}
+      />
+    ))}
+  </div>
+));
+
 const BeerIcon: React.FC<BeerIconProps> = ({ src, alt, className }) => {
   const [clicks, setClicks] = useState(0);
-  const [showEasterEgg, setShowEasterEgg] = useState(false);
 
   const handleClick = () => {
     const newCount = clicks + 1;
     setClicks(newCount);
 
     if (newCount === 5) {
-      setShowEasterEgg(true);
-      setTimeout(() => {
-        setShowEasterEgg(false);
-        setClicks(0);
-      }, 5000);
+      setTimeout(() => setClicks(0), 8000);
     }
   };
 
+  const showEasterEgg = clicks >= 5;
+
   return (
     <>
-      {showEasterEgg && (
-        <div className="absolute inset-0 pointer-events-none">
-          {Array.from({ length: 20 }).map((_, i) => (
-            <motion.div
-              key={i}
-              initial={{
-                y: -100,
-                x: Math.random() * window.innerWidth,
-                rotate: 0,
-              }}
-              animate={{ y: window.innerHeight + 100, rotate: 360 }}
-              transition={{
-                duration: 3 + Math.random() * 2,
-                ease: "linear",
-                delay: Math.random() * 0.5,
-              }}
-              className="absolute text-4xl"
-            >
-              🍺
-            </motion.div>
-          ))}
-        </div>
-      )}
+      {showEasterEgg && <BeerRain src={src} />}
 
       <motion.img
         src={src}

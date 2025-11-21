@@ -6,6 +6,7 @@ import { db, auth } from "../firebase";
 
 export const useCursors = () => {
   const [others, setOthers] = useState({});
+  const [self, setSelf] = useState(null);
   const myColor = useRef(
     "#" + Math.floor(Math.random() * 16777215).toString(16)
   );
@@ -46,8 +47,9 @@ export const useCursors = () => {
       const allCursorsRef = ref(db, "cursors");
       const unsubscribeCursors = onValue(allCursorsRef, (snapshot) => {
         const data = snapshot.val() || {};
-        const { [user.uid]: _, ...others } = data;
-        setOthers(others);
+        const { [user.uid]: selfCursor, ...otherCursors } = data;
+        setOthers(otherCursors);
+        setSelf(selfCursor);
       });
 
       const intervalId = setInterval(() => {
@@ -76,5 +78,5 @@ export const useCursors = () => {
     return () => unsubscribeAuth();
   }, []);
 
-  return others;
+  return { others, self };
 };

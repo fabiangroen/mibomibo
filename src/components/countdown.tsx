@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, memo } from "react";
+import { useEffect, useMemo, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export interface TimeLeft {
@@ -65,13 +65,14 @@ const getNextWeekday16 = (): Date => {
 const Countdown: React.FC<{
   timeLeft: TimeLeft;
   setTimeLeft: React.Dispatch<React.SetStateAction<TimeLeft>>;
-}> = ({ timeLeft, setTimeLeft }) => {
+  isMiboTime: boolean;
+  setIsMiboTime: React.Dispatch<React.SetStateAction<boolean>>;
+}> = ({ timeLeft, setTimeLeft, isMiboTime, setIsMiboTime }) => {
   // const [timeLeft, setTimeLeft] = useState<TimeLeft>({
   //   hours: 0,
   //   minutes: 0,
   //   seconds: 0,
   // });
-  const [isMiboTime, setIsMiboTime] = useState(false);
 
   const targetDate = useMemo(getNextWeekday16, []);
 
