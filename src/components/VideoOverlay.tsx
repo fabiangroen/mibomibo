@@ -17,7 +17,7 @@ export function VideoOverlay() {
         const now = Date.now();
         const elapsed = (now - data.startTime) / 1000;
 
-        if (elapsed < 300) {
+        if (elapsed < 185) {
           setStartTime(data.startTime);
           setIsVisible(true);
         } else {

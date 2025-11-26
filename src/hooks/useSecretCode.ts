@@ -17,10 +17,9 @@ export function useSecretCode() {
       bufferRef.current = newBuffer;
 
       if (newBuffer === SECRET_CODE) {
-        const videoRef = ref(db, "globalState/video");
+        const videoRef = ref(db, "globalState/video/startTime");
         set(videoRef, {
           startTime: Date.now(),
-          trigger: Math.random(),
         });
         bufferRef.current = "";
       }
