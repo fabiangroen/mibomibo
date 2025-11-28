@@ -1,5 +1,7 @@
-import { useState, memo } from "react";
+import { useState, useEffect, memo } from "react";
 import { motion } from "framer-motion";
+import { ref, onValue, runTransaction, set } from "firebase/database";
+import { db } from "../firebase";
 
 interface BeerIconProps {
   src: string;
@@ -28,21 +30,44 @@ const BeerRain = memo(({ src }: { src: string }) => (
 
 const BeerIcon: React.FC<BeerIconProps> = ({ src, alt, className }) => {
   const [clicks, setClicks] = useState(0);
+  const [isRaining, setIsRaining] = useState(false);
+
+  useEffect(() => {
+    const clicksRef = ref(db, `globalState/easteregg/clicks`);
+    const unsubscribe = onValue(clicksRef, (snapshot) => {
+      const count = snapshot.val();
+      if (typeof count === "number") {
+        setClicks(count);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (clicks >= 5) {
+      setIsRaining(true);
+
+      const timer = setTimeout(() => {
+        setIsRaining(false);
+        set(ref(db, `globalState/easteregg/clicks`), 0);
+      }, 8000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [clicks]);
 
   const handleClick = () => {
-    const newCount = clicks + 1;
-    setClicks(newCount);
+    if (isRaining) return;
 
-    if (newCount === 5) {
-      setTimeout(() => setClicks(0), 8000);
-    }
+    const clicksRef = ref(db, `globalState/easteregg/clicks`);
+    runTransaction(clicksRef, (currentClicks) => {
+      return (currentClicks || 0) + 1;
+    });
   };
-
-  const showEasterEgg = clicks >= 5;
 
   return (
     <>
-      {showEasterEgg && <BeerRain src={src} />}
+      {isRaining && <BeerRain src={src} />}
 
       <motion.img
         src={src}
