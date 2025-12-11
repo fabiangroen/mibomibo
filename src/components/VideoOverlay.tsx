@@ -2,58 +2,43 @@ import { useEffect, useRef, useState } from "react";
 import { ref, onValue } from "firebase/database";
 import { db } from "../firebase";
 
+const VIDEO_DURATION_SEC = 185;
+
 export function VideoOverlay() {
   const [isVisible, setIsVisible] = useState(false);
-  const [startTime, setStartTime] = useState<number | null>(null);
+  const [elapsedTime, setElapsedTime] = useState(0);
   const [needsInteraction, setNeedsInteraction] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    const videoStateRef = ref(db, "globalState/video");
+    const videoStateRef = ref(db, "globalState/video/startTime");
 
     const unsubscribe = onValue(videoStateRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data && data.startTime) {
-        const now = Date.now();
-        const elapsed = (now - data.startTime) / 1000;
+      const startTime = snapshot.val();
+      if (!startTime) return;
 
-        if (elapsed < 185) {
-          setStartTime(data.startTime);
-          setIsVisible(true);
-        } else {
-          setIsVisible(false);
-        }
-      }
+      const elapsed = (Date.now() - startTime) / 1000;
+      setElapsedTime(elapsed);
+      setIsVisible(elapsed < VIDEO_DURATION_SEC);
     });
 
-    return () => unsubscribe();
+    return unsubscribe;
   }, []);
 
   useEffect(() => {
-    if (isVisible && startTime && videoRef.current) {
-      const now = Date.now();
-      const elapsed = (now - startTime) / 1000;
+    const video = videoRef.current;
+    if (!video || !isVisible) return;
 
-      if (videoRef.current.duration && elapsed > videoRef.current.duration) {
-        setIsVisible(false);
-        return;
-      }
-
-      videoRef.current.currentTime = elapsed;
-      videoRef.current.play().catch((e) => {
-        console.log("Autoplay prevented:", e);
-        setNeedsInteraction(true);
-      });
-    }
-  }, [isVisible, startTime]);
+    video.currentTime = elapsedTime;
+    video.play().catch(() => setNeedsInteraction(true));
+  }, [isVisible, elapsedTime]);
 
   const handleInteraction = () => {
-    if (videoRef.current && startTime) {
-      const now = Date.now();
-      const elapsed = (now - startTime) / 1000;
-      videoRef.current.currentTime = elapsed;
-      videoRef.current.play().then(() => setNeedsInteraction(false));
-    }
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.currentTime = elapsedTime;
+    video.play().then(() => setNeedsInteraction(false));
   };
 
   if (!isVisible) return null;
@@ -66,14 +51,14 @@ export function VideoOverlay() {
       style={{ zIndex: 100 }}
     >
       {needsInteraction && (
-        <div
+        <button
           onClick={handleInteraction}
           className="absolute inset-0 z-50 bg-gray-900 flex items-center justify-center cursor-pointer"
         >
           <span className="text-amber-300 text-2xl font-bold animate-pulse">
             Klik om te openen...
           </span>
-        </div>
+        </button>
       )}
       <video
         ref={videoRef}
@@ -82,21 +67,6 @@ export function VideoOverlay() {
           needsInteraction ? "invisible" : ""
         }`}
         onEnded={() => setIsVisible(false)}
-        onLoadedMetadata={(e) => {
-          if (startTime) {
-            const now = Date.now();
-            const elapsed = (now - startTime) / 1000;
-            e.currentTarget.currentTime = elapsed;
-            if (elapsed < e.currentTarget.duration) {
-              e.currentTarget.play().catch((err) => {
-                console.error(err);
-                setNeedsInteraction(true);
-              });
-            } else {
-              setIsVisible(false);
-            }
-          }
-        }}
       />
     </div>
   );

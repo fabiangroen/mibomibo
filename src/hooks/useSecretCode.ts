@@ -10,15 +10,12 @@ export function useSecretCode() {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       const key = event.key.toLowerCase();
-
       if (key.length !== 1) return;
 
-      const newBuffer = (bufferRef.current + key).slice(-SECRET_CODE.length);
-      bufferRef.current = newBuffer;
+      bufferRef.current = (bufferRef.current + key).slice(-SECRET_CODE.length);
 
-      if (newBuffer === SECRET_CODE) {
-        const videoRef = ref(db, "globalState/video/startTime");
-        set(videoRef, Date.now());
+      if (bufferRef.current === SECRET_CODE) {
+        set(ref(db, "globalState/video/startTime"), Date.now());
         bufferRef.current = "";
       }
     };
