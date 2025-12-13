@@ -1,6 +1,5 @@
 import { useState, memo } from "react";
 import { motion } from "framer-motion";
-import { BEER_ICON } from "../constants";
 
 interface BeerIconProps {
   src: string;
@@ -10,7 +9,7 @@ interface BeerIconProps {
 
 const BeerRain = memo(({ src }: { src: string }) => (
   <div className="fixed inset-0 pointer-events-none z-50">
-    {Array.from({ length: BEER_ICON.RAIN_ITEM_COUNT }).map((_, i) => (
+    {Array.from({ length: 100 }).map((_, i) => (
       <motion.img
         key={i}
         src={src}
@@ -27,8 +26,6 @@ const BeerRain = memo(({ src }: { src: string }) => (
   </div>
 ));
 
-BeerRain.displayName = "BeerRain";
-
 const BeerIcon: React.FC<BeerIconProps> = ({ src, alt, className }) => {
   const [clicks, setClicks] = useState(0);
 
@@ -36,12 +33,12 @@ const BeerIcon: React.FC<BeerIconProps> = ({ src, alt, className }) => {
     const newCount = clicks + 1;
     setClicks(newCount);
 
-    if (newCount === BEER_ICON.CLICK_COUNT_FOR_RAIN) {
-      setTimeout(() => setClicks(0), BEER_ICON.RAIN_TIMEOUT_MS);
+    if (newCount === 5) {
+      setTimeout(() => setClicks(0), 8000);
     }
   };
 
-  const showEasterEgg = clicks >= BEER_ICON.CLICK_COUNT_FOR_RAIN;
+  const showEasterEgg = clicks >= 5;
 
   return (
     <>
@@ -55,9 +52,7 @@ const BeerIcon: React.FC<BeerIconProps> = ({ src, alt, className }) => {
         whileHover={{ scale: 1.1, rotate: 10 }}
         whileTap={{ scale: 0.9, rotate: -10 }}
         animate={
-          clicks > 0 && clicks < BEER_ICON.CLICK_COUNT_FOR_RAIN
-            ? { rotate: [0, -10, 10, -10, 10, 0] }
-            : {}
+          clicks > 0 && clicks < 5 ? { rotate: [0, -10, 10, -10, 10, 0] } : {}
         }
         transition={{ duration: 0.5 }}
       />

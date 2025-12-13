@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { useCursors } from "../hooks/useCursors";
+import type { Cursor } from "../types";
 
 const CursorSVG: React.FC<{
   color: string;
@@ -33,7 +34,10 @@ const CursorSVG: React.FC<{
 );
 
 const CursorOverlay: React.FC = () => {
-  const { others: cursors, self } = useCursors();
+  const { others: cursors, self } = useCursors() as {
+    others: Record<string, Cursor>;
+    self: Cursor | null;
+  };
   const localCursorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
