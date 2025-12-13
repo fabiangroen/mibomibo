@@ -1,11 +1,6 @@
-import { useEffect, useMemo, memo } from "react";
+import { memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-
-export interface TimeLeft {
-  hours: number;
-  minutes: number;
-  seconds: number;
-}
+import type { TimeLeft } from "../utils/time";
 
 const TimeBox = memo<{ value: number; label: string }>(({ value, label }) => {
   const digits = value.toString().padStart(2, "0").split("");
@@ -37,85 +32,12 @@ const TimeBox = memo<{ value: number; label: string }>(({ value, label }) => {
   );
 });
 
-const getNextWeekday16 = (): Date => {
-  const now = new Date();
-  const day = now.getDay();
-  const hour = now.getHours();
-  const target = new Date(now);
-
-  // If weekend, go to Monday 16:00
-  if (day === 0 || day === 6) {
-    const daysToMonday = day === 0 ? 1 : 2;
-    target.setDate(now.getDate() + daysToMonday);
-    target.setHours(16, 0, 0, 0);
-  } else {
-    // If weekday before 16:00, target today at 16:00
-    if (hour < 16) {
-      target.setHours(16, 0, 0, 0);
-    } else {
-      // After 16:00, target next weekday at 16:00
-      const daysToAdd = day === 5 ? 3 : 1; // Friday -> Monday, else next day
-      target.setDate(now.getDate() + daysToAdd);
-      target.setHours(16, 0, 0, 0);
-    }
-  }
-  return target;
-};
+TimeBox.displayName = "TimeBox";
 
 const Countdown: React.FC<{
   timeLeft: TimeLeft;
-  setTimeLeft: React.Dispatch<React.SetStateAction<TimeLeft>>;
   isMiboTime: boolean;
-  setIsMiboTime: React.Dispatch<React.SetStateAction<boolean>>;
-}> = ({ timeLeft, setTimeLeft, isMiboTime, setIsMiboTime }) => {
-  // const [timeLeft, setTimeLeft] = useState<TimeLeft>({
-  //   hours: 0,
-  //   minutes: 0,
-  //   seconds: 0,
-  // });
-
-  const targetDate = useMemo(getNextWeekday16, []);
-
-  useEffect(() => {
-    const calculateTimeLeft = () => {
-      const now = new Date();
-      const day = now.getDay();
-      const hour = now.getHours();
-
-      // Check if it's mibo time (weekday between 16:00 and 20:00)
-      const isWeekday = day >= 1 && day <= 5;
-      const isMiboHour = hour >= 16 && hour < 20;
-      setIsMiboTime(isWeekday && isMiboHour);
-
-      const diff = targetDate.getTime() - now.getTime();
-
-      if (diff > 0) {
-        setTimeLeft({
-          hours: Math.floor(diff / (1000 * 60 * 60)),
-          minutes: Math.floor((diff / (1000 * 60)) % 60),
-          seconds: Math.floor((diff / 1000) % 60),
-        });
-      } else {
-        setTimeLeft({ hours: 0, minutes: 0, seconds: 0 });
-      }
-    };
-
-    calculateTimeLeft();
-    const timer = setInterval(calculateTimeLeft, 1000);
-    return () => clearInterval(timer);
-  }, [targetDate]);
-
-  useEffect(() => {
-    if (isMiboTime) {
-      document.title = "Het is mibo tijd!";
-    } else {
-      const { hours, minutes, seconds } = timeLeft;
-      document.title = `${String(hours).padStart(2, "0")}:${String(
-        minutes
-      ).padStart(2, "0")}:${String(seconds).padStart(2, "0")} - Mibo`;
-    }
-  }, [timeLeft, isMiboTime]);
-
+}> = ({ timeLeft, isMiboTime }) => {
   if (isMiboTime) {
     return (
       <motion.div
@@ -128,7 +50,7 @@ const Countdown: React.FC<{
     );
   }
 
-  if (!(timeLeft.minutes == 0 && timeLeft.hours == 0)) {
+  if (!(timeLeft.minutes === 0 && timeLeft.hours === 0)) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 max-w-4xl mx-auto px-4">
         <TimeBox value={timeLeft.hours} label="hours" />

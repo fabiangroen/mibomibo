@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ref, onValue } from "firebase/database";
 import { db } from "../firebase";
-
-const VIDEO_DURATION_SEC = 185;
+import { VIDEO } from "../constants";
 
 export function VideoOverlay() {
   const [isVisible, setIsVisible] = useState(false);
@@ -19,7 +18,7 @@ export function VideoOverlay() {
 
       const elapsed = (Date.now() - startTime) / 1000;
       setElapsedTime(elapsed);
-      setIsVisible(elapsed < VIDEO_DURATION_SEC);
+      setIsVisible(elapsed < VIDEO.DURATION_MS / 1000);
     });
 
     return unsubscribe;

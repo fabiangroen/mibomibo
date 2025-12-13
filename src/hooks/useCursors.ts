@@ -3,10 +3,17 @@ import { ref, onValue, update, onDisconnect, get } from "firebase/database";
 import { onAuthStateChanged } from "firebase/auth";
 import throttle from "lodash/throttle";
 import { db, auth } from "../firebase";
+import { CURSOR } from "../constants";
+import type { Cursor } from "../types";
 
-export const useCursors = () => {
-  const [others, setOthers] = useState({});
-  const [self, setSelf] = useState(null);
+export interface UseCursorsResult {
+  others: Record<string, Cursor>;
+  self: Cursor | null;
+}
+
+export const useCursors = (): UseCursorsResult => {
+  const [others, setOthers] = useState<Record<string, Cursor>>({});
+  const [self, setSelf] = useState<Cursor | null>(null);
   const myColor = useRef(
     "#" + Math.floor(Math.random() * 16777215).toString(16)
   );
@@ -27,14 +34,20 @@ export const useCursors = () => {
         }
       });
 
-      const handleMouseMove = throttle((event) => {
+      const handleMouseMove = throttle((event: MouseEvent) => {
         lastMouseMove.current = Date.now();
         update(myRef, {
-          x: Math.round((event.clientX / window.innerWidth) * 1000) / 1000,
-          y: Math.round((event.clientY / window.innerHeight) * 1000) / 1000,
+          x:
+            Math.round(
+              (event.clientX / window.innerWidth) * CURSOR.POSITION_PRECISION
+            ) / CURSOR.POSITION_PRECISION,
+          y:
+            Math.round(
+              (event.clientY / window.innerHeight) * CURSOR.POSITION_PRECISION
+            ) / CURSOR.POSITION_PRECISION,
           lastUpdate: Date.now(),
         });
-      }, 100);
+      }, CURSOR.THROTTLE_MS);
 
       onDisconnect(myRef).update({
         x: null,
@@ -54,14 +67,14 @@ export const useCursors = () => {
 
       const intervalId = setInterval(() => {
         const now = Date.now();
-        if (now - lastMouseMove.current > 10000) {
+        if (now - lastMouseMove.current > CURSOR.INACTIVE_TIMEOUT_MS) {
           update(myRef, {
             x: null,
             y: null,
             lastUpdate: null,
           });
         }
-      }, 2000);
+      }, CURSOR.CLEANUP_INTERVAL_MS);
 
       return () => {
         window.removeEventListener("mousemove", handleMouseMove);

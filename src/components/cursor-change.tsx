@@ -19,11 +19,13 @@ import { ref, update, onValue } from "firebase/database";
 import { onAuthStateChanged } from "firebase/auth";
 
 import { MousePointer2 } from "lucide-react";
+import { CURSOR } from "../constants";
 
 export default function CursorChange() {
   const [name, setName] = useState("");
   const [color, setColor] = useState("#FFFFFF");
   const [user, setUser] = useState<string | null>(null);
+  
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       if (!user) return;
@@ -40,15 +42,15 @@ export default function CursorChange() {
         if (snapshot.exists()) setName(snapshot.val());
       });
 
+      // Cleanup function for this auth subscription
       return () => {
         unsubColor();
         unsubName();
       };
     });
 
-    return () => {
-      unsubscribeAuth();
-    };
+    // Cleanup function for the auth state listener
+    return () => unsubscribeAuth();
   }, []);
 
   function updateCursor(newName: string, newColor: string) {
@@ -77,7 +79,7 @@ export default function CursorChange() {
               Name
             </label>
             <Input
-              maxLength={16}
+              maxLength={CURSOR.MAX_NAME_LENGTH}
               value={name}
               onChange={(e) => setName(e.target.value)}
               id="name"
