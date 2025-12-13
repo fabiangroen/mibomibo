@@ -5,6 +5,7 @@ import BeerIcon from "./components/beer-icon";
 import CursorOverlay from "./components/cursorOverlay";
 import CursorChange from "./components/cursorChange";
 import { VideoOverlay } from "./components/VideoOverlay";
+import DrawingOverlay from "./components/DrawingOverlay";
 import { useSecretCode } from "./hooks/useSecretCode";
 import { useState } from "react";
 
@@ -16,11 +17,17 @@ function App() {
     seconds: 0,
   });
   const [isMiboTime, setIsMiboTime] = useState(false);
+  const [drawingMode, setDrawingMode] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col justify-center items-center px-4 relative overflow-hidden cursor-none">
+    <div
+      className={`min-h-screen bg-gray-900 text-white flex flex-col justify-center items-center px-4 relative overflow-hidden cursor-none ${
+        drawingMode ? "select-none" : ""
+      }`}
+    >
       <VideoOverlay />
       <CursorOverlay />
+      <DrawingOverlay onDrawingModeChange={setDrawingMode} />
       <CursorChange />
       {(!isMiboTime || (timeLeft.hours == 0 && timeLeft.minutes == 0)) && (
         <>
