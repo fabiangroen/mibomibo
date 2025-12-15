@@ -8,6 +8,7 @@ import { VideoOverlay } from "./components/VideoOverlay";
 import DrawingOverlay from "./components/DrawingOverlay";
 import { useSecretCode } from "./hooks/useSecretCode";
 import { useState } from "react";
+import SnowOverlay from "./components/snowOverlay";
 
 function App() {
   useSecretCode();
@@ -28,6 +29,7 @@ function App() {
       <VideoOverlay />
       <CursorOverlay />
       <DrawingOverlay onDrawingModeChange={setDrawingMode} />
+      <SnowOverlay />
       <CursorChange />
       {(!isMiboTime || (timeLeft.hours == 0 && timeLeft.minutes == 0)) && (
         <>
