@@ -1,15 +1,8 @@
 import { useMemo } from "react";
 
-interface Snowflake {
-  left: number;
-  delay: number;
-  duration: number;
-  size: number;
-}
-
 export default function SnowOverlay() {
   const snowflakes = useMemo(() => {
-    return Array.from({ length: 50 }, (_, i) => ({
+    return Array.from({ length: 50 }, () => ({
       left: Math.random() * 100,
       delay: Math.random() * 10,
       duration: 10 + Math.random() * 10,
@@ -30,7 +23,7 @@ export default function SnowOverlay() {
               height: `${flake.size}px`,
               animation: `snow-fall ${flake.duration}s linear infinite`,
               animationDelay: `${flake.delay}s`,
-              transform: 'translate3d(0, -100px, 0)',
+              transform: "translate3d(0, -100px, 0)",
             }}
           />
         ))}
