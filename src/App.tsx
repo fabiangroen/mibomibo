@@ -29,7 +29,7 @@ function App() {
       <VideoOverlay />
       <CursorOverlay />
       <DrawingOverlay onDrawingModeChange={setDrawingMode} />
-      <SnowOverlay />
+      {/* <SnowOverlay /> */}
       <CursorChange />
       {(!isMiboTime || (timeLeft.hours == 0 && timeLeft.minutes == 0)) && (
         <>
